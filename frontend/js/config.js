@@ -1,5 +1,5 @@
-// Cambia esta URL por la de tu backend desplegado en Render (o tu propio servidor).
-// En local, deja la de abajo apuntando a http://localhost:8000
+// Configuración global para el frontend
 window.APP_CONFIG = {
-  API_BASE_URL: "http://localhost:8000",
+  // URL de tu backend en producción
+  API_BASE_URL: "https://convertidor-mp3-9dsi.onrender.com",
 };
