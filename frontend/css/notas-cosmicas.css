@@ -1,0 +1,194 @@
+/* Fondo cósmico con notas fugaces — Convertidor MP3
+   Pareja: js/notas-cosmicas.js
+   Activa el tema oscuro añadiendo class="cosmic" al <body>. */
+
+/* ---------- capa de fondo ---------- */
+.sky-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.nebula {
+  position: absolute;
+  inset: -15%;
+  filter: blur(50px);
+  opacity: 0.75;
+  background:
+    radial-gradient(30% 34% at 20% 26%, rgba(139, 92, 246, 0.55) 0%, rgba(139, 92, 246, 0) 70%),
+    radial-gradient(28% 30% at 80% 60%, rgba(244, 114, 208, 0.42) 0%, rgba(244, 114, 208, 0) 70%),
+    radial-gradient(26% 28% at 58% 12%, rgba(110, 231, 255, 0.34) 0%, rgba(110, 231, 255, 0) 70%);
+  animation: nebulaDrift 34s ease-in-out infinite;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+/* ---------- pentagramas de polvo cósmico ---------- */
+.stave {
+  position: absolute;
+  left: -12%;
+  width: 124%;
+  height: 44px;
+  transform-origin: center;
+}
+
+.stave-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    rgba(167, 139, 250, 0) 0%,
+    rgba(167, 139, 250, 0.34) 18%,
+    rgba(110, 231, 255, 0.30) 50%,
+    rgba(244, 114, 208, 0.32) 82%,
+    rgba(244, 114, 208, 0) 100%);
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.25);
+}
+
+/* ---------- notas fugaces ---------- */
+.shooter {
+  position: absolute;
+  left: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation-name: shoot;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.shooter-dust,
+.shooter-trail {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.shooter-dust {
+  right: 4px;
+  filter: blur(9px);
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0) 0%,
+    var(--c-dust-mid) 55%,
+    var(--c-dust-end) 100%);
+}
+
+.shooter-trail {
+  right: 2px;
+  height: 2px;
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0) 0%,
+    var(--c-trail-mid) 70%,
+    var(--c-note) 100%);
+  box-shadow: 0 0 10px var(--c-trail-mid);
+}
+
+.shooter-note {
+  position: relative;
+  line-height: 1;
+  color: var(--c-note);
+  -webkit-text-stroke: 0.6px rgba(255, 255, 255, 0.85);
+  paint-order: stroke fill;
+  text-shadow:
+    0 0 calc(var(--note-size) * 0.5) var(--c-note),
+    0 0 calc(var(--note-size) * 1.3) var(--c-trail-mid);
+  user-select: none;
+}
+
+@keyframes shoot {
+  0%   { transform: translate3d(-18vw, 0, 0); opacity: 0; }
+  7%   { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translate3d(118vw, 0, 0); opacity: 0; }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.18; transform: scale(0.8); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+
+@keyframes nebulaDrift {
+  0%   { transform: translate3d(-3%, -2%, 0) scale(1.05); }
+  50%  { transform: translate3d(4%, 3%, 0) scale(1.2); }
+  100% { transform: translate3d(-3%, -2%, 0) scale(1.05); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shooter, .star, .nebula { animation: none; }
+  .shooter { opacity: 1; }
+}
+
+/* ---------- tema oscuro cósmico para la página ---------- */
+body.cosmic {
+  color: #e9e4ff;
+  background: radial-gradient(130% 100% at 50% -10%, #1b1140 0%, #0a0620 45%, #04030c 100%);
+  background-attachment: fixed;
+}
+
+body.cosmic .app-header,
+body.cosmic .app-shell,
+body.cosmic .app-footer { position: relative; z-index: 2; }
+
+body.cosmic .logo { color: #fff; text-shadow: 0 2px 18px rgba(139, 92, 246, 0.7); }
+body.cosmic .logo img { box-shadow: 0 14px 34px -14px rgba(139, 92, 246, 0.9); }
+body.cosmic .tagline,
+body.cosmic .app-footer { color: rgba(233, 228, 255, 0.68); text-shadow: 0 1px 8px rgba(4, 3, 12, 0.9); }
+
+body.cosmic .card {
+  background: rgba(16, 10, 40, 0.72);
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(167, 139, 250, 0.18);
+}
+
+body.cosmic .field-label { color: #a78bfa; font-weight: 700; letter-spacing: 0.06em; }
+body.cosmic .muted,
+body.cosmic .size-estimate-label,
+body.cosmic .status { color: rgba(233, 228, 255, 0.6); }
+body.cosmic .status[data-type="error"] { color: #ff8fb4; }
+body.cosmic .status[data-type="success"] { color: #7cffb2; }
+
+body.cosmic input[type="url"],
+body.cosmic input[type="text"],
+body.cosmic select {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(167, 139, 250, 0.3);
+  color: #f3eeff;
+}
+body.cosmic input::placeholder { color: rgba(233, 228, 255, 0.4); }
+body.cosmic input:focus,
+body.cosmic select:focus {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.3);
+}
+body.cosmic select option { color: #1a1030; }
+
+body.cosmic .pill {
+  background: rgba(167, 139, 250, 0.18);
+  border: 1px solid rgba(167, 139, 250, 0.32);
+  color: #c8b6fe;
+}
+body.cosmic .pill--size {
+  background: rgba(110, 231, 255, 0.16);
+  border-color: rgba(110, 231, 255, 0.3);
+  color: #9bebff;
+}
+
+body.cosmic .btn--primary {
+  color: #0b0620;
+  background: linear-gradient(120deg, #6ee7ff, #a78bfa 52%, #f472d0);
+  box-shadow: 0 16px 32px -14px rgba(167, 139, 250, 0.9);
+}
+
+body.cosmic fieldset.field-grid { border-top-color: rgba(167, 139, 250, 0.22); }
+body.cosmic .preview-card img { background: #2a1b52; }

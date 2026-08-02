@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Convertidor MP3</title>
+  <meta name="description" content="Convierte videos a MP3, M4A, WAV o FLAC con etiquetas ID3 personalizadas." />
+  <meta name="theme-color" content="#0A0620" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/notas-cosmicas.css" />
+</head>
+<body class="cosmic">
+  <header class="app-header">
+    <div class="logo">
+      <img src="icons/icon-192.png" alt="" width="36" height="36" />
+      <span>Convertidor <strong>MP3</strong></span>
+    </div>
+    <p class="tagline">Convierte, etiqueta y descarga tu audio favorito</p>
+  </header>
+
+  <main class="app-shell">
+    <section class="card" id="url-card">
+      <label class="field-label" for="url-input">Enlace del video</label>
+      <div class="url-row">
+        <input
+          id="url-input"
+          type="url"
+          inputmode="url"
+          placeholder="https://www.youtube.com/watch?v=..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button id="fetch-btn" class="btn btn--primary" type="button">Buscar</button>
+      </div>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="card preview-card" id="preview" hidden>
+      <div class="preview-top">
+        <img id="preview-thumb" alt="" />
+        <div class="preview-info">
+          <h2 id="preview-title">—</h2>
+          <p id="preview-uploader" class="muted">—</p>
+          <span id="preview-duration" class="pill">0:00</span>
+        </div>
+      </div>
+      <audio id="preview-audio" class="preview-audio" controls preload="none"></audio>
+    </section>
+
+    <form class="card" id="convert-form" hidden>
+      <div class="field-grid">
+        <div class="field">
+          <label class="field-label" for="format-select">Formato</label>
+          <select id="format-select">
+            <option value="mp3" selected>MP3</option>
+            <option value="m4a">M4A / AAC</option>
+            <option value="wav">WAV</option>
+            <option value="flac">FLAC</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="quality-select">Calidad</label>
+          <select id="quality-select">
+            <option value="320">320 kbps (máxima)</option>
+            <option value="256">256 kbps</option>
+            <option value="192" selected>192 kbps (recomendada)</option>
+            <option value="128">128 kbps</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="size-estimate" id="size-estimate" hidden>
+        <span class="pill pill--size" id="size-estimate-value">—</span>
+        <span class="size-estimate-label" id="size-estimate-label">tamaño estimado</span>
+      </p>
+
+      <fieldset class="field-grid">
+        <legend class="field-label">Etiquetas ID3</legend>
+        <div class="field">
+          <label class="field-label" for="tag-title">Título</label>
+          <input id="tag-title" type="text" placeholder="Título de la canción" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="tag-artist">Artista</label>
+          <input id="tag-artist" type="text" placeholder="Artista" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="tag-album">Álbum</label>
+          <input id="tag-album" type="text" placeholder="Álbum (opcional)" />
+        </div>
+      </fieldset>
+
+      <button id="convert-btn" class="btn btn--primary btn--full" type="submit">
+        Convertir y descargar
+      </button>
+    </form>
+  </main>
+
+  <footer class="app-footer">
+    <p>Hecho con yt-dlp · Usa solo contenido propio o con derechos para descargar.</p>
+  </footer>
+
+  <script src="js/notas-cosmicas.js"
+          data-shooters="28" data-speed="5" data-trail="300" data-stars="150" defer></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
