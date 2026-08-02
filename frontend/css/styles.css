@@ -119,9 +119,41 @@ select {
 }
 
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   border-color: var(--c3);
   box-shadow: 0 0 0 3px rgba(200, 182, 254, 0.45);
+}
+
+.cookies-details {
+  margin-top: 0.9rem;
+  border-top: 1px solid rgba(91, 84, 112, 0.15);
+  padding-top: 0.7rem;
+}
+
+.cookies-details summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.cookies-help {
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+}
+
+#cookies-input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(91, 84, 112, 0.2);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  outline: none;
+  resize: vertical;
 }
 
 .btn {

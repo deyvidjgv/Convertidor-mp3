@@ -37,6 +37,23 @@
         <button id="fetch-btn" class="btn btn--primary" type="button">Buscar</button>
       </div>
       <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <details class="cookies-details" id="cookies-details">
+        <summary>¿No carga el video? Pega tus cookies de YouTube</summary>
+        <p class="muted cookies-help">
+          Algunos videos requieren verificar que tienes sesión en YouTube.
+          Instala una extensión como
+          <a href="https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc" target="_blank" rel="noopener">Get cookies.txt LOCALLY</a>,
+          inicia sesión en YouTube, exporta las cookies de youtube.com y pégalas aquí.
+          Se guardan solo en este navegador, nunca en el servidor.
+        </p>
+        <textarea
+          id="cookies-input"
+          rows="4"
+          placeholder="# Netscape HTTP Cookie File&#10;.youtube.com  TRUE  /  TRUE  0  ..."
+          spellcheck="false"
+        ></textarea>
+      </details>
     </section>
 
     <section class="card preview-card" id="preview" hidden>

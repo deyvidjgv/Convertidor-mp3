@@ -71,12 +71,36 @@ class ConvertRequest(BaseModel):
     artist: Optional[str] = None
     album: Optional[str] = None
     cover_url: Optional[str] = None
+    cookies: Optional[str] = None
 
 
 def _safe_filename(name: str) -> str:
     name = re.sub(r'[\\/*?:"<>|]', "", name or "")
     name = name.strip()
     return name[:150] if name else "audio"
+
+
+class _CookieFile:
+    """Escribe el contenido de cookies (formato Netscape) a un archivo temporal
+    para pasárselo a yt-dlp, y lo borra al salir. Necesario porque YouTube
+    bloquea las IPs de datacenter (Render, etc.) pidiendo verificar sesión."""
+
+    def __init__(self, cookies: Optional[str]):
+        self._cookies = cookies
+        self._path: Optional[Path] = None
+
+    def __enter__(self) -> Optional[str]:
+        if not self._cookies or not self._cookies.strip():
+            return None
+        fd, name = tempfile.mkstemp(prefix="cookies-", suffix=".txt")
+        self._path = Path(name)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(self._cookies)
+        return str(self._path)
+
+    def __exit__(self, *exc_info):
+        if self._path is not None:
+            self._path.unlink(missing_ok=True)
 
 
 def _new_job_dir() -> Path:
@@ -117,23 +141,26 @@ def health():
 
 
 @app.get("/api/info")
-def get_info(url: str):
+def get_info(url: str, cookies: Optional[str] = None):
     if not url:
         raise HTTPException(status_code=400, detail="Falta el parámetro url")
 
-    ydl_opts = {
-        "quiet": True,
-        "no_warnings": True,
-        "skip_download": True,
-        "noplaylist": True,
-        "format": "bestaudio/best",
-    }
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-    except Exception as exc:
-        logger.warning("Fallo al obtener info de %s: %s", url, exc)
-        raise HTTPException(status_code=400, detail="No se pudo obtener información de ese enlace") from exc
+    with _CookieFile(cookies) as cookiefile:
+        ydl_opts = {
+            "quiet": True,
+            "no_warnings": True,
+            "skip_download": True,
+            "noplaylist": True,
+            "format": "bestaudio/best",
+        }
+        if cookiefile:
+            ydl_opts["cookiefile"] = cookiefile
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+        except Exception as exc:
+            logger.warning("Fallo al obtener info de %s: %s", url, exc)
+            raise HTTPException(status_code=400, detail="No se pudo obtener información de ese enlace") from exc
 
     return {
         "title": info.get("title"),
@@ -145,24 +172,27 @@ def get_info(url: str):
 
 
 @app.get("/api/stream")
-def stream_audio(url: str):
+def stream_audio(url: str, cookies: Optional[str] = None):
     """Sirve el audio original sin transcodificar, para la vista previa del reproductor."""
     if not url:
         raise HTTPException(status_code=400, detail="Falta el parámetro url")
 
     job_dir = _new_job_dir()
-    ydl_opts = {
-        "format": "bestaudio/best",
-        "outtmpl": str(job_dir / "preview.%(ext)s"),
-        "noplaylist": True,
-        "quiet": True,
-        "no_warnings": True,
-    }
+    with _CookieFile(cookies) as cookiefile:
+        ydl_opts = {
+            "format": "bestaudio/best",
+            "outtmpl": str(job_dir / "preview.%(ext)s"),
+            "noplaylist": True,
+            "quiet": True,
+            "no_warnings": True,
+        }
+        if cookiefile:
+            ydl_opts["cookiefile"] = cookiefile
 
-    audio_path, _info = _download_with_ydl(
-        url, ydl_opts, job_dir, "preview.*",
-        error_detail="No se pudo obtener el audio para la vista previa",
-    )
+        audio_path, _info = _download_with_ydl(
+            url, ydl_opts, job_dir, "preview.*",
+            error_detail="No se pudo obtener el audio para la vista previa",
+        )
 
     media_type = mimetypes.guess_type(str(audio_path))[0] or "application/octet-stream"
     cleanup = BackgroundTask(shutil.rmtree, job_dir, ignore_errors=True)
@@ -180,25 +210,28 @@ def convert(payload: ConvertRequest):
         raise HTTPException(status_code=400, detail="Falta la URL")
 
     job_dir = _new_job_dir()
-    ydl_opts = {
-        "format": "bestaudio/best",
-        "outtmpl": str(job_dir / "audio.%(ext)s"),
-        "postprocessors": [
-            {
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": fmt,
-                "preferredquality": payload.quality or "192",
-            }
-        ],
-        "noplaylist": True,
-        "quiet": True,
-        "no_warnings": True,
-    }
+    with _CookieFile(payload.cookies) as cookiefile:
+        ydl_opts = {
+            "format": "bestaudio/best",
+            "outtmpl": str(job_dir / "audio.%(ext)s"),
+            "postprocessors": [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": fmt,
+                    "preferredquality": payload.quality or "192",
+                }
+            ],
+            "noplaylist": True,
+            "quiet": True,
+            "no_warnings": True,
+        }
+        if cookiefile:
+            ydl_opts["cookiefile"] = cookiefile
 
-    audio_path, info = _download_with_ydl(
-        payload.url, ydl_opts, job_dir, f"audio.{fmt}",
-        error_detail="Error al descargar o convertir el audio",
-    )
+        audio_path, info = _download_with_ydl(
+            payload.url, ydl_opts, job_dir, f"audio.{fmt}",
+            error_detail="Error al descargar o convertir el audio",
+        )
 
     tags = {
         "title": payload.title or info.get("title") or "audio",

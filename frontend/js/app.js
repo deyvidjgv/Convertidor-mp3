@@ -21,9 +21,25 @@
     sizeEstimate: document.getElementById("size-estimate"),
     sizeEstimateValue: document.getElementById("size-estimate-value"),
     sizeEstimateLabel: document.getElementById("size-estimate-label"),
+    cookiesInput: document.getElementById("cookies-input"),
   };
 
   let currentInfo = null;
+
+  const COOKIES_STORAGE_KEY = "convertidor-mp3:cookies";
+  els.cookiesInput.value = localStorage.getItem(COOKIES_STORAGE_KEY) || "";
+  els.cookiesInput.addEventListener("input", () => {
+    const value = els.cookiesInput.value.trim();
+    if (value) {
+      localStorage.setItem(COOKIES_STORAGE_KEY, els.cookiesInput.value);
+    } else {
+      localStorage.removeItem(COOKIES_STORAGE_KEY);
+    }
+  });
+
+  function getCookies() {
+    return els.cookiesInput.value.trim() || null;
+  }
 
   function formatDuration(totalSeconds) {
     if (totalSeconds === null || totalSeconds === undefined) return "";
@@ -110,7 +126,9 @@
     els.fetchBtn.disabled = true;
 
     try {
-      const res = await fetch(`${API_BASE}/api/info?url=${encodeURIComponent(url)}`);
+      const cookies = getCookies();
+      const cookiesQS = cookies ? `&cookies=${encodeURIComponent(cookies)}` : "";
+      const res = await fetch(`${API_BASE}/api/info?url=${encodeURIComponent(url)}${cookiesQS}`);
       if (!res.ok) throw new Error(await parseError(res));
 
       currentInfo = await res.json();
@@ -129,7 +147,7 @@
       els.form.hidden = false;
       updateSizeEstimate();
 
-      els.previewAudio.src = `${API_BASE}/api/stream?url=${encodeURIComponent(url)}`;
+      els.previewAudio.src = `${API_BASE}/api/stream?url=${encodeURIComponent(url)}${cookiesQS}`;
       els.previewAudio.load();
       els.previewAudio.play().catch(() => {});
 
@@ -201,6 +219,7 @@
         artist: els.artistInput.value.trim(),
         album: els.albumInput.value.trim(),
         cover_url: currentInfo ? currentInfo.thumbnail : null,
+        cookies: getCookies(),
       };
 
       const res = await fetch(`${API_BASE}/api/convert`, {
