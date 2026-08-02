@@ -107,9 +107,10 @@ def _download_with_ydl(url: str, ydl_opts: dict, job_dir: Path, glob_pattern: st
     return produced_files[0], info
 
 
-@app.get("/api/health")
-def health():
-    return {"status": "ok"}
+@app.get("/")
+def read_root():
+    return {"message": "API del Convertidor MP3 funcionando correctamente. Usa /api/health para comprobar el estado."}
+
 
 
 @app.get("/api/info")
