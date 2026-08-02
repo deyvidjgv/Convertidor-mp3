@@ -7,4 +7,4 @@ services:
     plan: free
     envVars:
       - key: ALLOWED_ORIGINS
-        value: https://TU-SITIO.netlify.app
+        value: https://convertidormp3.netlify.app
